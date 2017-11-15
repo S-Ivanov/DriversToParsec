@@ -3,6 +3,11 @@
  * 
  */
 public class Driver {
+
+    /**
+     * Конструктор
+     * 
+     */
 	public Driver(String lastName, String firstName, String middleName, String passportSeries, String passportNumber, String car) {
 		this.lastName = lastName;
 		this.firstName = firstName;
