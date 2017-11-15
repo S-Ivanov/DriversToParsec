@@ -16,6 +16,24 @@ public final class ParsecIdentifiers {
 	public static final String PASSPORT_NUMBER_ID = "5E086FC9-39D3-441A-8D55-72FB74353992";
 	
     /**
+     * Идентификатор даты выдачи паспорта
+     * 
+     */
+	public static final String PASSPORT_DATE_ID = "363BF15D-97CB-4530-AADC-32A7C2F6E36C";
+	
+    /**
+     * Идентификатор кем выдан паспорт
+     * 
+     */
+	public static final String PASSPORT_ISSUE_ID = "5EB29792-1D6F-4091-B175-C4721A65ACE4";
+	
+    /**
+     * Идентификатор адреса прописки
+     * 
+     */
+	public static final String PASSPORT_ADDRESS_ID = "8CD6C4D7-10F9-4A72-BF24-23F04AB8FBC8";
+	
+    /**
      * Идентификатор виртуального подразделения "Временные пропуска"
      * 
      */
