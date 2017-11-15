@@ -1,5 +1,5 @@
 /**
- * Водитель
+ * Р’РѕРґРёС‚РµР»СЊ
  * 
  */
 public class Driver {
@@ -13,7 +13,7 @@ public class Driver {
 	}
 	
     /**
-     * Фамилия
+     * Р¤Р°РјРёР»РёСЏ
      * 
      */
     public String getLastName() {
@@ -21,7 +21,7 @@ public class Driver {
     }
 	
     /**
-     * Имя
+     * РРјСЏ
      * 
      */
     public String getFirstName() {
@@ -29,7 +29,7 @@ public class Driver {
     }
 	
     /**
-     * Отчество
+     * РћС‚С‡РµСЃС‚РІРѕ
      * 
      */
     public String getMiddleName() {
@@ -37,7 +37,7 @@ public class Driver {
     }
 	
     /**
-     * Серия паспорта
+     * РЎРµСЂРёСЏ РїР°СЃРїРѕСЂС‚Р°
      * 
      */
     public String getPassportSeries() {
@@ -45,7 +45,7 @@ public class Driver {
     }
 	
     /**
-     * Номер паспорта
+     * РќРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Р°
      * 
      */
     public String getPassportNumber() {
@@ -53,7 +53,7 @@ public class Driver {
     }
 	
     /**
-     * Марка и номер автомобиля
+     * РњР°СЂРєР° Рё РЅРѕРјРµСЂ Р°РІС‚РѕРјРѕР±РёР»СЏ
      * 
      */
     public String getCar() {
