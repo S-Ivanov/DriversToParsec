@@ -13,21 +13,21 @@ public class DriversToParsecWriter {
 	}
 	
 	public void AddDriver(Driver driver) {
-		// TODO: проверка на null: driver, его свойства
+		// TODO: РїСЂРѕРІРµСЂРєР° РЅР° null: driver, РµРіРѕ СЃРІРѕР№СЃС‚РІР°
 		
 		IntegrationService integrationService = new IntegrationService(wsdlLocation);
 		IntegrationServiceSoap integrationServiceSoap = integrationService.getIntegrationServiceSoap();
 		SessionResult sessionResult = integrationServiceSoap.openSession(domain, userName, password);
 		if (sessionResult.getResult() < 0) {
-			// TODO: ошибка
+			// TODO: РѕС€РёР±РєР°
 		}
 		else {
 			String sessionID = sessionResult.getValue().getSessionID();
 			
-			// найти всех людей с указанными ФИО
+			// РЅР°Р№С‚Рё РІСЃРµС… Р»СЋРґРµР№ СЃ СѓРєР°Р·Р°РЅРЅС‹РјРё Р¤РРћ
 			ArrayOfPerson persons = integrationServiceSoap.findPeople(sessionID, driver.getLastName(), driver.getFirstName(), driver.getMiddleName());
 			
-			// среди найденных людей пытаемся выбрать по паспортным данным нужного человека
+			// СЃСЂРµРґРё РЅР°Р№РґРµРЅРЅС‹С… Р»СЋРґРµР№ РїС‹С‚Р°РµРјСЃСЏ РІС‹Р±СЂР°С‚СЊ РїРѕ РїР°СЃРїРѕСЂС‚РЅС‹Рј РґР°РЅРЅС‹Рј РЅСѓР¶РЅРѕРіРѕ С‡РµР»РѕРІРµРєР°
 			Person existingPerson = null;
 			for (Person person : persons.getPerson()) {
 				ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID, person.getID());
@@ -47,7 +47,7 @@ public class DriversToParsecWriter {
 			String personID = null;
 			boolean personExists = false;
 			if (existingPerson == null) {
-				// если человек не найден, добавим его
+				// РµСЃР»Рё С‡РµР»РѕРІРµРє РЅРµ РЅР°Р№РґРµРЅ, РґРѕР±Р°РІРёРј РµРіРѕ
 				personID = integrationServiceSoap.createPerson(sessionID, DriverToPerson(driver)).getValue();
 			}
 			else {
@@ -55,23 +55,23 @@ public class DriversToParsecWriter {
 				personExists = true;
 			}
 			
-			// подготовить данные для записи
+			// РїРѕРґРіРѕС‚РѕРІРёС‚СЊ РґР°РЅРЅС‹Рµ РґР»СЏ Р·Р°РїРёСЃРё
 			ArrayOfExtraFieldValue extraFieldValues = new ArrayOfExtraFieldValue();
 			if (!personExists) {
-				// если человек не был записан, добавим его паспортные данные
+				// РµСЃР»Рё С‡РµР»РѕРІРµРє РЅРµ Р±С‹Р» Р·Р°РїРёСЃР°РЅ, РґРѕР±Р°РІРёРј РµРіРѕ РїР°СЃРїРѕСЂС‚РЅС‹Рµ РґР°РЅРЅС‹Рµ
 				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID, driver.getPassportSeries());
 				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID, driver.getPassportNumber());
 			};
-			// марка и номер автомобиля
+			// РјР°СЂРєР° Рё РЅРѕРјРµСЂ Р°РІС‚РѕРјРѕР±РёР»СЏ
 			AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.CAR_ID, driver.getCar());
-			// TODO: остальные данные
+			// TODO: РѕСЃС‚Р°Р»СЊРЅС‹Рµ РґР°РЅРЅС‹Рµ
 			// ...
 			
-			// записать данные
+			// Р·Р°РїРёСЃР°С‚СЊ РґР°РЅРЅС‹Рµ
 			String personEditSessionID = integrationServiceSoap.openPersonEditingSession(sessionID, personID).getValue();
 			integrationServiceSoap.setPersonExtraFieldValues(personEditSessionID, extraFieldValues);
 			
-			// закрытие сеансов работы
+			// Р·Р°РєСЂС‹С‚РёРµ СЃРµР°РЅСЃРѕРІ СЂР°Р±РѕС‚С‹
 			integrationServiceSoap.closePersonEditingSession(personEditSessionID);
 			integrationServiceSoap.closeSession(sessionID);
 		}
