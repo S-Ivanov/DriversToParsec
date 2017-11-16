@@ -1,3 +1,6 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Optional;
 
@@ -8,6 +11,21 @@ import ru.parsec.parsec3intergationservice.*;
  * 
  */
 public class DriversToParsecWriter {
+
+	/**
+	 * Консольный тест
+	 * 
+	 */
+	public static void main(String args[]) throws IOException {
+
+		System.out.println("DriversToParsecWriter test");
+
+		// ...
+
+		System.out.print("Press Enter to exit ...");
+		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+		String line = in.readLine();
+	}
 
 	/**
 	 * Конструктор
@@ -65,7 +83,9 @@ public class DriversToParsecWriter {
 				Person person = FindPerson(integrationServiceSoap, sessionID, driver);
 
 				// если человек не найден, добавим его
-				String personID = person == null ? integrationServiceSoap.createPerson(sessionID, DriverToPerson(driver)).getValue() : person.getID();
+				String personID = person == null
+						? integrationServiceSoap.createPerson(sessionID, DriverToPerson(driver)).getValue()
+						: person.getID();
 
 				// подготовить данные для записи
 				ArrayOfExtraFieldValue extraFieldValues = new ArrayOfExtraFieldValue();
@@ -77,7 +97,7 @@ public class DriversToParsecWriter {
 					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID,
 							driver.getPassportNumber());
 				}
-				
+
 				// дата выдачи паспорта
 				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_DATE_ID, driver.getPassportDate());
 				// кем выдан паспорт
@@ -109,16 +129,17 @@ public class DriversToParsecWriter {
 	}
 
 	Person FindPerson(IntegrationServiceSoap integrationServiceSoap, String sessionID, Driver driver) {
-		
+
 		// найти всех людей с указанными ФИО
 		ArrayOfPerson persons = integrationServiceSoap.findPeople(sessionID, driver.getLastName(),
 				driver.getFirstName(), driver.getMiddleName());
 
-		// среди найденных людей пытаемся найти нужного человека по паспортным данным
+		// среди найденных людей пытаемся найти нужного человека по паспортным
+		// данным
 		Person foundPerson = null;
 		for (Person person : persons.getPerson()) {
-			ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap
-					.getPersonExtraFieldValues(sessionID, person.getID());
+			ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID,
+					person.getID());
 
 			Optional<ExtraFieldValue> passportSeries = FindFieldValue(extraFieldValues,
 					ParsecIdentifiers.PASSPORT_SERIES_ID);
@@ -137,7 +158,7 @@ public class DriversToParsecWriter {
 		}
 		return foundPerson;
 	}
-	
+
 	Optional<ExtraFieldValue> FindFieldValue(ArrayOfExtraFieldValue extraFieldValues, String fieldID) {
 		return extraFieldValues.getExtraFieldValue().stream().filter(t -> t.getTEMPLATEID().equals(fieldID))
 				.findFirst();
