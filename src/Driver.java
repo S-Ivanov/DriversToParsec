@@ -25,12 +25,68 @@ public class Driver {
 	 *            Кем выдан паспорт
 	 * @param address
 	 *            Адрес прописки
+	 * @param client
+	 *            Покупатель
+	 * @param receiver
+	 *            Грузополучатель
 	 * @param car
 	 *            Марка и номер автомобиля
+	 * @param permitNumber
+	 *            Номер пропуска
 	 */
-	public Driver(String lastName, String firstName, String middleName, String passportSeries, String passportNumber, Date passportDate, String passportIssue, String address,
-			String car) {
-		
+	public Driver(String lastName, String firstName, String middleName, String passportSeries, String passportNumber,
+			Date passportDate, String passportIssue, String address, String client, String receiver, String car,
+			int permitNumber) {
+
+		// проверить корректность параметров
+		CheckParameters(lastName, firstName, middleName, passportSeries, passportNumber, passportDate, passportIssue,
+				address, client, receiver, car, permitNumber);
+
+		this.lastName = lastName.trim();
+		this.firstName = firstName.trim();
+		this.middleName = middleName.trim();
+		this.passportSeries = passportSeries.trim();
+		this.passportNumber = passportNumber.trim();
+		this.passportDate = passportDate;
+		this.passportIssue = passportIssue.trim();
+		this.address = address.trim();
+		this.organization = getOrganization(client, receiver);
+		this.car = car.trim();
+		this.permitNumber = permitNumber;
+	}
+
+	/**
+	 * Проверка корректности параметров конструктора
+	 * 
+	 * @param lastName
+	 *            Фамилия
+	 * @param firstName
+	 *            Имя
+	 * @param middleName
+	 *            Отчество
+	 * @param passportSeries
+	 *            Серия паспорта
+	 * @param passportNumber
+	 *            Номер паспорта
+	 * @param passportDate
+	 *            Дата выдачи паспорта
+	 * @param passportIssue
+	 *            Кем выдан паспорт
+	 * @param address
+	 *            Адрес прописки
+	 * @param client
+	 *            Покупатель
+	 * @param receiver
+	 *            Грузополучатель
+	 * @param car
+	 *            Марка и номер автомобиля
+	 * @param permitNumber
+	 *            Номер пропуска
+	 */
+	void CheckParameters(String lastName, String firstName, String middleName, String passportSeries,
+			String passportNumber, Date passportDate, String passportIssue, String address, String client,
+			String receiver, String car, int permitNumber) {
+
 		if (lastName == null || lastName.trim().length() == 0)
 			throw new IllegalArgumentException("lastName");
 		if (firstName == null || firstName.trim().length() == 0)
@@ -49,16 +105,31 @@ public class Driver {
 			throw new IllegalArgumentException("address");
 		if (car == null || car.trim().length() == 0)
 			throw new IllegalArgumentException("car");
+		if (permitNumber <= 0)
+			throw new IllegalArgumentException("permitNumber");
+	}
+
+	/**
+	 * Формировать наименование организации
+	 * 
+	 * @param client
+	 *            Покупатель
+	 * @param receiver
+	 *            Грузополучатель
+	 */
+	public static String getOrganization(String client, String receiver) {
 		
-		this.lastName = lastName.trim();
-		this.firstName = firstName.trim();
-		this.middleName = middleName.trim();
-		this.passportSeries = passportSeries.trim();
-		this.passportNumber = passportNumber.trim();
-		this.passportDate = passportDate;
-		this.passportIssue = passportIssue.trim();
-		this.address = address.trim();
-		this.car = car.trim();
+		if ((client == null || client.trim().length() == 0) && (receiver == null || receiver.trim().length() == 0))
+			throw new IllegalArgumentException("client, receiver");
+
+		if (client == null || client.trim().length() == 0)
+			return receiver;
+		else if (receiver == null || receiver.trim().length() == 0)
+			return client;
+		else if (client.equalsIgnoreCase(receiver))
+			return client;
+		else
+			return client + " / " + receiver;
 	}
 
 	/**
@@ -126,6 +197,14 @@ public class Driver {
 	}
 
 	/**
+	 * Наименование организации
+	 * 
+	 */
+	public String getOrganization() {
+		return organization;
+	}
+
+	/**
 	 * Марка и номер автомобиля
 	 * 
 	 */
@@ -133,6 +212,15 @@ public class Driver {
 		return car;
 	}
 
-	String lastName, firstName, middleName, passportSeries, passportNumber, passportIssue, address, car;
+	/**
+	 * Номер пропуска
+	 * 
+	 */
+	public int getPermitNumber() {
+		return permitNumber;
+	}
+
+	String lastName, firstName, middleName, passportSeries, passportNumber, passportIssue, address, organization, car;
+	int permitNumber;
 	Date passportDate;
 }
