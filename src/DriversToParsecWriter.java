@@ -1,9 +1,10 @@
-﻿import java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Date;
 import java.util.Optional;
+import java.util.List;
 
 import ru.parsec.parsec3intergationservice.*;
 
@@ -22,34 +23,31 @@ public class DriversToParsecWriter {
 		System.out.println("DriversToParsecWriter test");
 
 		// создать объект для записи водителя
-		URL wsdlLocation = new URL("");
-		String userName = "";
-		String password = "";
+		URL wsdlLocation = new URL("http://drgskd01:10101/IntegrationService/IntegrationService.asmx");
+		String userName = "userName";
+		String password = "password";
 		DriversToParsecWriter driversToParsecWriter = new DriversToParsecWriter(wsdlLocation, userName, password);
 
 		// создать объект водителя
-		String lastName = "";
-		String firstName = "";
-		String middleName = "";
-		String passportSeries = "";
-		String passportNumber = "";
+		String lastName = "lastName";
+		String firstName = "firstName";
+		String middleName = "middleName";
+		String passportSeries = "XYZ";
+		String passportNumber = "123456";
 		Date passportDate = new Date();
-		String passportIssue = "";
-		String address = "";
-		String client = "";
-		String receiver = "";
-		String car = "";
+		String passportIssue = "passportIssue";
+		String address = "address";
+		String client = "client";
+		String receiver = "receiver";
+		String car = "car";
 		int permitNumber = 1234;
-		Driver driver = new Driver(lastName, firstName, middleName, passportSeries, passportNumber, passportDate,
+		Driver driver = new Driver(lastName, firstName, middleName, passportSeries, passportNumber, passportDate.toString(),
 				passportIssue, address, client, receiver, car, permitNumber);
 
 		// добавить водителя в Парек
 		driversToParsecWriter.AddDriver(driver);
 
-		System.out.print("Press Enter to exit ...");
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		@SuppressWarnings("unused")
-		String line = in.readLine();
+		System.out.println("Ok");
 	}
 
 	/**
@@ -126,10 +124,8 @@ public class DriversToParsecWriter {
 				if (person == null) {
 					// если человек не был записан, добавим его паспортные
 					// данные
-					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID,
-							driver.getPassportSeries());
-					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID,
-							driver.getPassportNumber());
+					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID, driver.getPassportSeries());
+					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID, driver.getPassportNumber());
 				}
 
 				// остальные данные водителя:
@@ -179,30 +175,25 @@ public class DriversToParsecWriter {
 	static Person FindPerson(IntegrationServiceSoap integrationServiceSoap, String sessionID, Driver driver) {
 
 		// найти всех людей с указанными ФИО
-		ArrayOfPerson persons = integrationServiceSoap.findPeople(sessionID, driver.getLastName(),
-				driver.getFirstName(), driver.getMiddleName());
+		ArrayOfPerson persons = integrationServiceSoap.findPeople(sessionID, driver.getLastName(), driver.getFirstName(), driver.getMiddleName());
 
 		// среди найденных людей пытаемся найти нужного человека по паспортным
 		// данным
 		Person foundPerson = null;
 		for (Person person : persons.getPerson()) {
-			ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID,
-					person.getID());
+			ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID, person.getID());
 
-			Optional<ExtraFieldValue> passportSeries = FindFieldValue(extraFieldValues,
-					ParsecIdentifiers.PASSPORT_SERIES_ID);
-			if (!passportSeries.isPresent()
-					|| !passportSeries.get().toString().equalsIgnoreCase(driver.getPassportSeries())) {
+			Object passportSeries = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID);
+			if (passportSeries == null || !passportSeries.toString().equalsIgnoreCase(driver.getPassportSeries())) {
 				continue;
 			}
 
-			Optional<ExtraFieldValue> passportNumber = FindFieldValue(extraFieldValues,
-					ParsecIdentifiers.PASSPORT_NUMBER_ID);
-			if (passportNumber.isPresent()
-					&& passportNumber.get().toString().equalsIgnoreCase(driver.getPassportNumber())) {
+			Object passportNumber = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID);
+			if (passportNumber != null && passportNumber.toString().equalsIgnoreCase(driver.getPassportNumber())) {
 				foundPerson = person;
 				break;
 			}
+                        
 		}
 		return foundPerson;
 	}
@@ -217,9 +208,15 @@ public class DriversToParsecWriter {
 	 *            Идентификатор дополнительного поля
 	 * @return Найденное значение
 	 */
-	static Optional<ExtraFieldValue> FindFieldValue(ArrayOfExtraFieldValue extraFieldValues, String fieldID) {
-		return extraFieldValues.getExtraFieldValue().stream().filter(t -> t.getTEMPLATEID().equals(fieldID))
-				.findFirst();
+	static Object FindFieldValue(ArrayOfExtraFieldValue extraFieldValues, String fieldID) {
+            List<ExtraFieldValue> values = extraFieldValues.getExtraFieldValue();
+            for (int i = 0; i < values.size(); i++) {
+                ExtraFieldValue value = values.get(i);
+                if (value.getTEMPLATEID().equalsIgnoreCase(fieldID)) {
+                    return value.getVALUE();
+                }
+            }
+            return null;
 	}
 
 	/**

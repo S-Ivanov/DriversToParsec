@@ -35,7 +35,7 @@ public class Driver {
 	 *            Номер пропуска
 	 */
 	public Driver(String lastName, String firstName, String middleName, String passportSeries, String passportNumber,
-			Date passportDate, String passportIssue, String address, String client, String receiver, String car,
+			String passportDate, String passportIssue, String address, String client, String receiver, String car,
 			int permitNumber) {
 
 		// проверить корректность параметров
@@ -47,7 +47,7 @@ public class Driver {
 		this.middleName = middleName.trim();
 		this.passportSeries = passportSeries.trim();
 		this.passportNumber = passportNumber.trim();
-		this.passportDate = passportDate;
+		this.passportDate = passportDate.trim();
 		this.passportIssue = passportIssue.trim();
 		this.address = address.trim();
 		this.organization = getOrganization(client, receiver);
@@ -84,7 +84,7 @@ public class Driver {
 	 *            Номер пропуска
 	 */
 	void CheckParameters(String lastName, String firstName, String middleName, String passportSeries,
-			String passportNumber, Date passportDate, String passportIssue, String address, String client,
+			String passportNumber, String passportDate, String passportIssue, String address, String client,
 			String receiver, String car, int permitNumber) {
 
 		if (lastName == null || lastName.trim().length() == 0)
@@ -97,7 +97,7 @@ public class Driver {
 			throw new IllegalArgumentException("passportSeries");
 		if (passportNumber == null || passportNumber.trim().length() == 0)
 			throw new IllegalArgumentException("passportNumber");
-		if (passportDate == null)
+		if (passportDate == null || passportDate.trim().length() == 0)
 			throw new IllegalArgumentException("passportDate");
 		if (passportIssue == null || passportIssue.trim().length() == 0)
 			throw new IllegalArgumentException("passportIssue");
@@ -176,7 +176,7 @@ public class Driver {
 	 * Дата выдачи паспорта
 	 * 
 	 */
-	public Date getPassportDate() {
+	public String getPassportDate() {
 		return passportDate;
 	}
 
@@ -220,7 +220,6 @@ public class Driver {
 		return permitNumber;
 	}
 
-	String lastName, firstName, middleName, passportSeries, passportNumber, passportIssue, address, organization, car;
+	String lastName, firstName, middleName, passportSeries, passportDate, passportNumber, passportIssue, address, organization, car;
 	int permitNumber;
-	Date passportDate;
 }

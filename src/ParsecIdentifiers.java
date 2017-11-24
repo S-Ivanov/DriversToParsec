@@ -1,59 +1,71 @@
 /**
  * Идентификаторы Парсек
  * 
+ * ****** Скрипт для команды SelectTopNRows из среды SSMS  ******
+ * SELECT TOP 1000 [FIELD_TEMPLATE_ID]
+ *      ,[FIELD_TEMPLATE_OWNER]
+ *      ,[FIELD_TEMPLATE_NAME]
+ *      ,[FIELD_TEMPLATE_VALUE]
+ *      ,[TYPE_ID]
+ *  FROM [Parsec3].[dbo].[EXTRA_FIELD_TEMPLATE]
  */
 public final class ParsecIdentifiers {
 	/**
 	 * Идентификатор серии паспорта
 	 * 
 	 */
-	public static final String PASSPORT_SERIES_ID = "E3FDC8A7-1185-42CB-B3E0-D799982A1524";
+	public static final String PASSPORT_SERIES_ID = "C19ADC48-B752-4FB5-9FC5-3CB73FF3F1C3";
 
 	/**
 	 * Идентификатор номера паспорта
 	 * 
 	 */
-	public static final String PASSPORT_NUMBER_ID = "5E086FC9-39D3-441A-8D55-72FB74353992";
+	public static final String PASSPORT_NUMBER_ID = "7B4F2AC3-5735-425F-82D6-5EBEA4980578";
 
 	/**
 	 * Идентификатор даты выдачи паспорта
 	 * 
 	 */
-	public static final String PASSPORT_DATE_ID = "363BF15D-97CB-4530-AADC-32A7C2F6E36C";
+	public static final String PASSPORT_DATE_ID = "39C1AC9B-B867-4597-B9EE-226C89C70091";
 
 	/**
 	 * Идентификатор кем выдан паспорт
 	 * 
 	 */
-	public static final String PASSPORT_ISSUE_ID = "5EB29792-1D6F-4091-B175-C4721A65ACE4";
+	public static final String PASSPORT_ISSUE_ID = "5C60F8D6-35A7-4456-A62B-C67FBBC10C9B";
 
 	/**
 	 * Идентификатор адреса прописки
 	 * 
 	 */
-	public static final String PASSPORT_ADDRESS_ID = "8CD6C4D7-10F9-4A72-BF24-23F04AB8FBC8";
+	public static final String PASSPORT_ADDRESS_ID = "E875079B-AFA8-4B89-8BA5-D309045A678E";
 
 	/**
 	 * Идентификатор наименования организации
 	 * 
 	 */
-	public static final String ORGANIZATION_ID = "CDD38C91-3659-4063-BD49-EA0F0CEA7362";
+	public static final String ORGANIZATION_ID = "46E7C0E9-F9CA-4A4C-B7C0-4BE528CD3ABC";
 
 	/**
 	 * Идентификатор марки и номера автомобиля
 	 * 
 	 */
-	public static final String CAR_ID = "BA2208DF-2C9A-410B-AFBF-3952DBFA7AD5";
+	public static final String CAR_ID = "7C12A464-9031-4739-8664-90E5299669EA";
 
 	/**
 	 * Идентификатор номера пропуска
 	 * 
 	 */
-	public static final String PERMIT_NUMBER_ID = "18F71BBF-6C2B-49D7-B23E-C85781859CA8";
+	public static final String PERMIT_NUMBER_ID = "F4E7AF89-317B-4E19-87BD-39AFA171BBE0";
 
 	/**
 	 * Идентификатор виртуального подразделения "Временные пропуска"
 	 * 
+         * ****** Скрипт для команды SelectTopNRows из среды SSMS  ******
+         *  SELECT TOP 1000 [ORG_ID]
+         *      ,[ORG_NAME]
+         *  FROM [Parsec3].[dbo].[ORGANIZATION]
+         * order by [ORG_NAME]
 	 */
-	public static final String TEMP_CARDS_DEPARTMENT_ID = "045284EA-8C5D-4044-BA27-2F64D7420129";
+	public static final String TEMP_CARDS_DEPARTMENT_ID = "14625818-CCBD-452B-86F1-5B0AB346752F";
 }
