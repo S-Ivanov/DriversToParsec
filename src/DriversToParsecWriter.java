@@ -1,9 +1,6 @@
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Date;
-import java.util.Optional;
 import java.util.List;
 
 import ru.parsec.parsec3intergationservice.*;
@@ -11,8 +8,9 @@ import ru.parsec.parsec3intergationservice.*;
 /**
  * Запись информации о водителях в Парсек
  * 
+ * @author Иванов С.В.
  */
-public class DriversToParsecWriter {
+public class DriversToParsecWriter extends ParsecBase {
 
 	/**
 	 * Консольный тест
@@ -29,19 +27,17 @@ public class DriversToParsecWriter {
 		DriversToParsecWriter driversToParsecWriter = new DriversToParsecWriter(wsdlLocation, userName, password);
 
 		// создать объект водителя
-		String lastName = "lastName";
-		String firstName = "firstName";
-		String middleName = "middleName";
-		String passportSeries = "XYZ";
-		String passportNumber = "123456";
+                String driversFIO = "Семченков С.А., Никитенков В.В., Никитенков В.Н., Пацев В.П.";
+		String passportSeries = "ABC";
+		String passportNumber = "234567";
 		Date passportDate = new Date();
 		String passportIssue = "passportIssue";
 		String address = "address";
 		String client = "client";
 		String receiver = "receiver";
-		String car = "car";
+		String car = "car-2";
 		int permitNumber = 1234;
-		Driver driver = new Driver(lastName, firstName, middleName, passportSeries, passportNumber, passportDate.toString(),
+		Driver driver = new Driver(driversFIO, passportSeries, passportNumber, passportDate.toString(),
 				passportIssue, address, client, receiver, car, permitNumber);
 
 		// добавить водителя в Парек
@@ -56,22 +52,12 @@ public class DriversToParsecWriter {
 	 * @param wsdlLocation
 	 *            URL wsdl-файла
 	 * @param userName
-	 *            Имя пользователя Парсек
+	 *            Имя пользователя Парсек с правами на добавление/изменение людей
 	 * @param password
-	 *            Пароль пользователя Парсек
+	 *            Пароль пользователя Парсек с правами на добавление/изменение людей
 	 */
 	public DriversToParsecWriter(URL wsdlLocation, String userName, String password) {
-
-		if (wsdlLocation == null)
-			throw new IllegalArgumentException("wsdlLocation");
-		if (userName == null || userName.trim().length() == 0)
-			throw new IllegalArgumentException("userName");
-		if (password == null || password.trim().length() == 0)
-			throw new IllegalArgumentException("password");
-
-		this.wsdlLocation = wsdlLocation;
-		this.userName = userName.trim();
-		this.password = password.trim();
+            super(wsdlLocation, userName, password);
 	}
 
 	/**
@@ -94,113 +80,75 @@ public class DriversToParsecWriter {
 	 * @param driver
 	 *            Информация о водителе
 	 */
-	public void AddDriver(Driver driver) {
+	public void AddDriver(final Driver driver) {
 
-		if (driver == null)
-			throw new IllegalArgumentException("driver");
+            if (driver == null)
+                throw new IllegalArgumentException("driver");
 
-		IntegrationService integrationService = new IntegrationService(wsdlLocation);
-		IntegrationServiceSoap integrationServiceSoap = integrationService.getIntegrationServiceSoap();
-		String sessionID = null, personEditSessionID = null;
-		try {
+            super.OpenSession();
 
-			SessionResult sessionResult = integrationServiceSoap.openSession("", userName, password);
-			if (sessionResult.getResult() < 0) {
-				// ошибка открытия сеанса
-				throw new UnsupportedOperationException();
-			} else {
-				sessionID = sessionResult.getValue().getSessionID();
+            String personEditSessionID = null;
+            try {
 
-				// ищем нужного человека
-				Person person = FindPerson(integrationServiceSoap, sessionID, driver);
-
-				// если человек не найден, добавим его
-				String personID = person == null
-						? integrationServiceSoap.createPerson(sessionID, DriverToPerson(driver)).getValue()
-						: person.getID();
-
-				// подготовить данные для записи
-				ArrayOfExtraFieldValue extraFieldValues = new ArrayOfExtraFieldValue();
-				if (person == null) {
-					// если человек не был записан, добавим его паспортные
-					// данные
-					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID, driver.getPassportSeries());
-					AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID, driver.getPassportNumber());
-				}
-
-				// остальные данные водителя:
-				// дата выдачи паспорта
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_DATE_ID, driver.getPassportDate());
-				// кем выдан паспорт
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_ISSUE_ID, driver.getPassportIssue());
-				// адрес прописки
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_ADDRESS_ID, driver.getAddress());
-				// наименование организации
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.ORGANIZATION_ID, driver.getOrganization());
-				// марка и номер автомобиля
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.CAR_ID, driver.getCar());
-				// номер пропуска
-				AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PERMIT_NUMBER_ID, driver.getPermitNumber());
-
-				// записать подготовленные данные
-				personEditSessionID = integrationServiceSoap.openPersonEditingSession(sessionID, personID).getValue();
-				integrationServiceSoap.setPersonExtraFieldValues(personEditSessionID, extraFieldValues);
-			}
-
-		} catch (Exception e) {
-			throw e;
-		} finally {
-
-			// закрытие сеансов работы
-			if (integrationServiceSoap != null) {
-				if (personEditSessionID != null)
-					integrationServiceSoap.closePersonEditingSession(personEditSessionID);
-				if (sessionID != null)
-					integrationServiceSoap.closeSession(sessionID);
-			}
-		}
-	}
-
-	/**
-	 * Поиск информации о водителе в Парсек
-	 * 
-	 * @param integrationServiceSoap
-	 *            Сервис
-	 * @param sessionID
-	 *            Идентификатор сессии
-	 * @param driver
-	 *            Водитель
-	 * @return Учетная единица Парсек "человек"
-	 */
-	static Person FindPerson(IntegrationServiceSoap integrationServiceSoap, String sessionID, Driver driver) {
-
-		// найти всех людей с указанными ФИО
-		ArrayOfPerson persons = integrationServiceSoap.findPeople(sessionID, driver.getLastName(), driver.getFirstName(), driver.getMiddleName());
-
-		// среди найденных людей пытаемся найти нужного человека по паспортным
-		// данным
-		Person foundPerson = null;
-		for (Person person : persons.getPerson()) {
-			ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID, person.getID());
-
-			Object passportSeries = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID);
-			if (passportSeries == null || !passportSeries.toString().equalsIgnoreCase(driver.getPassportSeries())) {
-				continue;
-			}
-
-			Object passportNumber = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID);
-			if (passportNumber != null && passportNumber.toString().equalsIgnoreCase(driver.getPassportNumber())) {
-				foundPerson = person;
-				break;
-			}
+                // ищем нужного человека
+                Person person = FindPerson(driver.getLastName(), driver.getFirstName(), driver.getMiddleName(), new FindPersonPredicate() {
+                    
+                    public Boolean test(Person person) {
                         
-		}
-		return foundPerson;
+                        ArrayOfExtraFieldValue extraFieldValues = integrationServiceSoap.getPersonExtraFieldValues(sessionID, person.getID());
+
+                        Object passportSeries = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID);
+                        if (passportSeries == null || !passportSeries.toString().equalsIgnoreCase(driver.getPassportSeries())) 
+                            return false;
+
+                        Object passportNumber = FindFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID);
+                        return passportNumber != null && passportNumber.toString().equalsIgnoreCase(driver.getPassportNumber());
+                    }
+                });
+                
+                // если человек не найден, добавим его
+                String personID = person == null
+                    ? integrationServiceSoap.createPerson(sessionID, DriverToPerson(driver)).getValue()
+                    : person.getID();
+            
+                // подготовить данные для записи
+                ArrayOfExtraFieldValue extraFieldValues = new ArrayOfExtraFieldValue();
+                if (person == null) {
+                    // если человек не был записан, добавим его паспортные данные
+                    AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_SERIES_ID, driver.getPassportSeries());
+                    AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_NUMBER_ID, driver.getPassportNumber());
+                }
+
+                // остальные данные водителя:
+                // дата выдачи паспорта
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_DATE_ID, driver.getPassportDate());
+                // кем выдан паспорт
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_ISSUE_ID, driver.getPassportIssue());
+                // адрес прописки
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PASSPORT_ADDRESS_ID, driver.getAddress());
+                // наименование организации
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.ORGANIZATION_ID, driver.getOrganization());
+                // марка и номер автомобиля
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.CAR_ID, driver.getCar());
+                // номер пропуска
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.PERMIT_NUMBER_ID, driver.getPermitNumber());
+                // дополнительное поле "Водители"
+                AddExtraFieldValue(extraFieldValues, ParsecIdentifiers.DRIVERS_ID, driver.getDriversFIO());
+
+                // записать подготовленные данные
+                personEditSessionID = integrationServiceSoap.openPersonEditingSession(sessionID, personID).getValue();
+                integrationServiceSoap.setPersonExtraFieldValues(personEditSessionID, extraFieldValues);
+            }
+            finally {
+
+                if (personEditSessionID != null)
+                        integrationServiceSoap.closePersonEditingSession(personEditSessionID);
+                super.CloseSession();
+            }
 	}
 
 	/**
-	 * Поиск значения дополнительного поля (номер паспорта, его серия, адрес и
-	 * т.д.)
+	 * Поиск значения дополнительного поля (номер паспорта, его серия, адрес и т.д.)
 	 * 
 	 * @param extraFieldValues
 	 *            Список дополнительных полей
@@ -220,8 +168,7 @@ public class DriversToParsecWriter {
 	}
 
 	/**
-	 * Добавление значения дополнительного поля (номер паспорта, его серия,
-	 * адрес и т.д.)
+	 * Добавление значения дополнительного поля (номер паспорта, его серия, адрес и т.д.)
 	 * 
 	 * @param extraFieldValues
 	 *            Список дополнительных полей
@@ -242,6 +189,7 @@ public class DriversToParsecWriter {
 	 * 
 	 * @param driver
 	 *            Водитель
+         * 
 	 * @return Учетная единица Парсек "человек"
 	 */
 	static Person DriverToPerson(Driver driver) {
@@ -252,7 +200,4 @@ public class DriversToParsecWriter {
 		person.setORGID(ParsecIdentifiers.TEMP_CARDS_DEPARTMENT_ID);
 		return person;
 	}
-
-	URL wsdlLocation;
-	String userName, password;
 }

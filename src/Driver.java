@@ -3,18 +3,15 @@ import java.util.Date;
 /**
  * Водитель
  * 
+ * @author Иванов С.В.
  */
 public class Driver {
 
 	/**
 	 * Конструктор
 	 * 
-	 * @param lastName
-	 *            Фамилия
-	 * @param firstName
-	 *            Имя
-	 * @param middleName
-	 *            Отчество
+	 * @param driversFIO
+	 *            ФИО водителей через запятую
 	 * @param passportSeries
 	 *            Серия паспорта
 	 * @param passportNumber
@@ -34,17 +31,15 @@ public class Driver {
 	 * @param permitNumber
 	 *            Номер пропуска
 	 */
-	public Driver(String lastName, String firstName, String middleName, String passportSeries, String passportNumber,
+	public Driver(String driversFIO, String passportSeries, String passportNumber,
 			String passportDate, String passportIssue, String address, String client, String receiver, String car,
 			int permitNumber) {
 
 		// проверить корректность параметров
-		CheckParameters(lastName, firstName, middleName, passportSeries, passportNumber, passportDate, passportIssue,
+		CheckParameters(driversFIO, passportSeries, passportNumber, passportDate, passportIssue,
 				address, client, receiver, car, permitNumber);
 
-		this.lastName = lastName.trim();
-		this.firstName = firstName.trim();
-		this.middleName = middleName.trim();
+		this.driversFIO = driversFIO.trim();
 		this.passportSeries = passportSeries.trim();
 		this.passportNumber = passportNumber.trim();
 		this.passportDate = passportDate.trim();
@@ -53,17 +48,16 @@ public class Driver {
 		this.organization = getOrganization(client, receiver);
 		this.car = car.trim();
 		this.permitNumber = permitNumber;
+                
+                // выделить ФИО основного водителя для идентификации в Парсек
+                TranslateMainDriver(this.driversFIO);
 	}
 
 	/**
 	 * Проверка корректности параметров конструктора
 	 * 
-	 * @param lastName
-	 *            Фамилия
-	 * @param firstName
-	 *            Имя
-	 * @param middleName
-	 *            Отчество
+	 * @param driversFIO
+	 *            ФИО водителей через запятую
 	 * @param passportSeries
 	 *            Серия паспорта
 	 * @param passportNumber
@@ -83,16 +77,12 @@ public class Driver {
 	 * @param permitNumber
 	 *            Номер пропуска
 	 */
-	void CheckParameters(String lastName, String firstName, String middleName, String passportSeries,
+	void CheckParameters(String driversFIO, String passportSeries,
 			String passportNumber, String passportDate, String passportIssue, String address, String client,
 			String receiver, String car, int permitNumber) {
 
-		if (lastName == null || lastName.trim().length() == 0)
-			throw new IllegalArgumentException("lastName");
-		if (firstName == null || firstName.trim().length() == 0)
-			throw new IllegalArgumentException("firstName");
-		if (middleName == null || middleName.trim().length() == 0)
-			throw new IllegalArgumentException("middleName");
+		if (driversFIO == null || driversFIO.trim().length() == 0)
+			throw new IllegalArgumentException("driversFIO");
 		if (passportSeries == null || passportSeries.trim().length() == 0)
 			throw new IllegalArgumentException("passportSeries");
 		if (passportNumber == null || passportNumber.trim().length() == 0)
@@ -110,12 +100,41 @@ public class Driver {
 	}
 
 	/**
+	 * Выделить ФИО основного водителя для идентификации в Парсек
+	 * 
+	 * @param driversFIO
+	 *            ФИО водителей через запятую
+         * 
+         * Заполняются поля lastName, firstName, middleName
+	 */
+        void TranslateMainDriver(String driversFIO) {
+            
+            String[] drivers = driversFIO.split(",");
+            String[] mainDriverFIO = drivers[0].split(" ");
+            lastName = mainDriverFIO[0];
+            if (mainDriverFIO.length == 3) {
+                firstName = mainDriverFIO[1];
+                middleName = mainDriverFIO[2];
+            } else if (mainDriverFIO.length == 2) {
+                String[] initials = mainDriverFIO[1].split("\\.");
+                if (initials.length == 1)
+                    firstName = mainDriverFIO[1];
+                else {
+                    firstName = initials[0] + ".";
+                    middleName = initials[1] + ".";
+                }
+            }
+        }
+        
+	/**
 	 * Формировать наименование организации
 	 * 
 	 * @param client
 	 *            Покупатель
 	 * @param receiver
 	 *            Грузополучатель
+         * @return 
+         *            Наименование организации  
 	 */
 	public static String getOrganization(String client, String receiver) {
 		
@@ -154,6 +173,14 @@ public class Driver {
 	 */
 	public String getMiddleName() {
 		return middleName;
+	}
+
+	/**
+	 * ФИО водителей через запятую
+	 * 
+	 */
+	public String getDriversFIO() {
+		return driversFIO;
 	}
 
 	/**
@@ -220,6 +247,6 @@ public class Driver {
 		return permitNumber;
 	}
 
-	String lastName, firstName, middleName, passportSeries, passportDate, passportNumber, passportIssue, address, organization, car;
+	String lastName, firstName, middleName, driversFIO, passportSeries, passportDate, passportNumber, passportIssue, address, organization, car;
 	int permitNumber;
 }

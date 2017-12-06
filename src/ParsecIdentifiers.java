@@ -1,6 +1,8 @@
 /**
  * Идентификаторы Парсек
  * 
+ * @author Иванов С.В.
+ * 
  * ****** Скрипт для команды SelectTopNRows из среды SSMS  ******
  * SELECT TOP 1000 [FIELD_TEMPLATE_ID]
  *      ,[FIELD_TEMPLATE_OWNER]
@@ -57,6 +59,12 @@ public final class ParsecIdentifiers {
 	 * 
 	 */
 	public static final String PERMIT_NUMBER_ID = "F4E7AF89-317B-4E19-87BD-39AFA171BBE0";
+
+	/**
+	 * Идентификатор дополнительного поля "Водители"
+	 * 
+	 */
+	public static final String DRIVERS_ID = "18C54C8F-FAC7-41CD-9C82-FD5C927A26E1";
 
 	/**
 	 * Идентификатор виртуального подразделения "Временные пропуска"
